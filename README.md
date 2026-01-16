@@ -6,3 +6,7 @@ TEAM MEMBERS:
 - Rawin Olivera
 - Gabriel Dubiela
 - Luis Rojas
+
+
+## Trello Board
+[Group 16](https://trello.com/b/NvZAYAhj/cse-325-net-team-project)
