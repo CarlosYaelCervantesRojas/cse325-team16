@@ -1,0 +1,73 @@
+@page "/auth/callback"
+@inject NavigationManager Navigation
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject IJwtService JwtService
+@inject IJSRuntime JSRuntime
+@using Microsoft.AspNetCore.Identity
+@using VehicleRentalManager.Data
+@using VehicleRentalManager.Services
+@using System.Security.Claims
+
+<PageTitle>Auth Callback</PageTitle>
+
+@if (IsLoading)
+{
+    <p>Processing authentication...</p>
+}
+else if (!string.IsNullOrEmpty(Token))
+{
+    <p>Authentication successful! Your JWT token: @Token</p>
+    <button @onclick="CopyToken">Copy Token</button>
+    <button @onclick="GoHome">Go to Home</button>
+}
+else
+{
+    <p>Authentication failed.</p>
+}
+
+@code {
+    public bool IsLoading { get; set; } = true;
+    public string? Token { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await SignInManager.GetExternalLoginInfoAsync();
+        if (result != null)
+        {
+            var email = result.Principal.FindFirstValue(ClaimTypes.Email);
+            var user = await UserManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                // Register new user
+                user = new IdentityUser { UserName = email, Email = email };
+                var createResult = await UserManager.CreateAsync(user);
+                if (createResult.Succeeded)
+                {
+                    await UserManager.AddLoginAsync(user, result);
+                }
+            }
+
+            if (user != null)
+            {
+                await SignInManager.SignInAsync(user, isPersistent: false);
+                Token = JwtService.GenerateToken(user.Id, user.Email);
+            }
+        }
+
+        IsLoading = false;
+    }
+
+    private async Task CopyToken()
+    {
+        if (!string.IsNullOrEmpty(Token))
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", Token);
+        }
+    }
+
+    private void GoHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+}

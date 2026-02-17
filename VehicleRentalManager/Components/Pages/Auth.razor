@@ -1,0 +1,30 @@
+@page "/auth"
+@inject NavigationManager Navigation
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject IJwtService JwtService
+@using Microsoft.AspNetCore.Identity
+@using VehicleRentalManager.Data
+@using VehicleRentalManager.Services
+
+<PageTitle>Authentication</PageTitle>
+
+<h3>Sign in with Google</h3>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="alert alert-info">@Message</div>
+}
+
+<button class="btn btn-primary" @onclick="SignInWithGoogle">Sign in with Google</button>
+
+@code {
+    public string? Message { get; set; }
+
+    private async Task SignInWithGoogle()
+    {
+        var redirectUrl = Navigation.ToAbsoluteUri("/auth/callback").ToString();
+        var properties = SignInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+        Navigation.NavigateTo(properties.RedirectUri, forceLoad: true);
+    }
+}
