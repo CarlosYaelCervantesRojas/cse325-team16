@@ -1,5 +1,6 @@
 using VehicleRentalManager.Components;
 using VehicleRentalManager.Services;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,6 +19,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddSingleton<MongoContext>();
+builder.Services.AddScoped<VehicleService>();
+builder.Services.AddControllers();
 // ── MongoDB services ──────────────────────────────────────────────────────────
 builder.Services.AddSingleton<MongoDbService>();
 builder.Services.AddScoped<UserService>();
@@ -103,6 +107,8 @@ app.MapRazorPages();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapControllers();
 
 app.MapStaticAssets();
 
